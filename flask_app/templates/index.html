@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - SAMSUM Center{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Video Background -->
+<div class="hero-section text-white position-relative" style="min-height: 500px; display: flex; align-items: center; overflow: hidden;">
+    <!-- Video Background -->
+    <video autoplay muted loop playsinline class="position-absolute w-100 h-100" style="object-fit: cover; z-index: 0;">
+        <!-- Video của bạn -->
+        <source src="{{ url_for('static', filename='videos/Video Project.mp4') }}" type="video/mp4">
+    </video>
+    
+    <!-- Overlay để text dễ đọc -->
+    <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)); z-index: 1;"></div>
+    
+    <!-- Content -->
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center">
+            <div class="col-md-8 mx-auto text-center">
+                <h1 class="display-3 fw-bold mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7); animation: fadeInUp 1s ease;">
+                    Chào mừng đến SAMSUNG Center
+                </h1>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Danh mục sản phẩm</h2>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('products_by_category', category_id=category.id) }}" class="text-decoration-none">
+                <div class="card category-card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="text-muted">Xem sản phẩm</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Best Sellers -->
+{% if bestsellers %}
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-fire text-danger"></i> Sản phẩm bán chạy
+        </h2>
+        <div class="row">
+            {% for product in bestsellers %}
+            <div class="col-md-3 mb-4">
+                <div class="card product-card h-100">
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Best Seller</span>
+                    <img src="{{ url_for('static', filename='images/' ~ product.image_url) }}" 
+                         class="card-img-top" alt="{{ product.name }}"
+                         onerror="this.src='https://via.placeholder.com/300x200?text={{ product.name }}'">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-danger fw-bold">{{ "{:,}".format(product.price) }} VNĐ</p>
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Latest Products -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Sản phẩm mới nhất</h2>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-3 mb-4">
+            <div class="card product-card h-100">
+                <img src="{{ url_for('static', filename='images/' ~ product.image_url) }}" 
+                     class="card-img-top" alt="{{ product.name }}"
+                     onerror="this.src='https://via.placeholder.com/300x200?text={{ product.name }}'">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-danger fw-bold">{{ "{:,}".format(product.price) }} VNĐ</p>
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-eye"></i> Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">
+            Xem tất cả sản phẩm <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                <h5>Miễn phí vận chuyển</h5>
+                <p class="text-muted">Cho đơn hàng trên 5 triệu</p>
+            </div>
+            <div class="col-md-3 mb-3">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h5>Bảo hành chính hãng</h5>
+                <p class="text-muted">12 tháng 1 đổi 1</p>
+            </div>
+            <div class="col-md-3 mb-3">
+                <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                <h5>Hỗ trợ 24/7</h5>
+                <p class="text-muted">Tư vấn nhiệt tình</p>
+            </div>
+            <div class="col-md-3 mb-3">
+                <i class="fas fa-credit-card fa-3x text-primary mb-3"></i>
+                <h5>Thanh toán đa dạng</h5>
+                <p class="text-muted">COD, Chuyển khoản, Thẻ</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

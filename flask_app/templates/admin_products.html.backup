@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý sản phẩm - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.9) 100%),
+                    url('/static/images/samsumbanner.jpg') center/cover no-repeat;
+        padding: 2.5rem 0;
+        margin-bottom: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+    }
+    
+    .admin-header h2 {
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        margin: 0;
+    }
+    
+    .admin-header .btn-add {
+        background: white;
+        color: #667eea;
+        font-weight: 600;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .admin-header .btn-add:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .admin-nav {
+        margin-bottom: 1.5rem;
+    }
+    
+    .admin-nav .btn {
+        margin-right: 0.5rem;
+    }
+    
+    .admin-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .admin-card .card-body {
+        padding: 2rem;
+    }
+    
+    .admin-table {
+        margin: 0;
+    }
+    
+    .admin-table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .admin-table thead th {
+        border: none;
+        color: #2d3748;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1.2rem 1rem;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .admin-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f3f5;
+    }
+    
+    .admin-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .admin-table tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border: none;
+        font-weight: 500;
+    }
+    
+    .product-id {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 700;
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .product-name {
+        color: #2d3748;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .product-price {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 1.15rem;
+    }
+    
+    .category-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+        letter-spacing: 0.5px;
+    }
+    
+    .category-s { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .category-a { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .category-m { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+    .category-z { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+    
+    .bestseller-yes {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(250, 112, 154, 0.4);
+        animation: pulse 2s infinite;
+    }
+    
+    .bestseller-no {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        color: #6c757d;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .action-btn {
+        padding: 0.5rem 0.9rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        margin: 0 0.2rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .action-btn i {
+        font-size: 1rem;
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+    }
+    
+    .btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 172, 254, 0.5);
+        color: white;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
+    }
+    
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(240, 147, 251, 0.5);
+        color: white;
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 107, 0.5);
+        color: white;
+    }
+    
+    .stats-footer {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 0 0 20px 20px;
+        margin: 0 -2rem -2rem -2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stats-text {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .stats-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .product-image-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .product-image-thumb:hover {
+        transform: scale(1.8);
+        z-index: 1000;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="container my-5">
+    <div class="admin-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center position-relative">
+                <h2><i class="fas fa-cog me-2"></i> Quản lý sản phẩm</h2>
+                <a href="{{ url_for('admin_add_product') }}" class="btn btn-add">
+                    <i class="fas fa-plus me-2"></i> Thêm sản phẩm mới
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card admin-card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Danh mục</th>
+                            <th>Năm SX</th>
+                            <th>Best Seller</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td><span class="product-id">{{ product.id }}</span></td>
+                            <td>
+                                <img src="{{ url_for('static', filename='images/' ~ product.image) }}" 
+                                     class="product-image-thumb" 
+                                     alt="{{ product.tenSP }}"
+                                     onerror="this.src='https://via.placeholder.com/60x60?text=No+Image'">
+                            </td>
+                            <td><span class="product-name">{{ product.tenSP }}</span></td>
+                            <td><span class="product-price">{{ "{:,}".format(product.gia) }} ₫</span></td>
+                            <td>
+                                {% if product.categoryID == 1 %}
+                                <span class="category-badge category-s">S-Series</span>
+                                {% elif product.categoryID == 2 %}
+                                <span class="category-badge category-a">A-Series</span>
+                                {% elif product.categoryID == 3 %}
+                                <span class="category-badge category-m">M-Series</span>
+                                {% elif product.categoryID == 4 %}
+                                <span class="category-badge category-z">Z-Series</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ product.namSX }}</strong></td>
+                            <td>
+                                {% if product.bestSeller %}
+                                <span class="bestseller-yes"><i class="fas fa-star me-1"></i> Yes</span>
+                                {% else %}
+                                <span class="bestseller-no">No</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                                   class="action-btn btn-view" target="_blank" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" 
+                                   class="action-btn btn-edit" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin_delete_product', product_id=product.id) }}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                                    <button type="submit" class="action-btn btn-delete" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="stats-footer">
+                <p class="stats-text">
+                    <i class="fas fa-box-open me-2"></i>
+                    Tổng số: <strong>{{ products|length }}</strong> sản phẩm
+                </p>
+                <div class="stats-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
