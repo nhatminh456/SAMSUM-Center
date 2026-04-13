@@ -10,6 +10,7 @@ class MySQLProductRepository(IProductRepository):
     
     def __init__(self, db_config: dict):
         self.db_config = db_config
+        self.last_error = ""
     
     def _get_connection(self):
         """Create database connection"""
@@ -30,31 +31,48 @@ class MySQLProductRepository(IProductRepository):
             'created_at': row.get('created_at')
         }
     
+    def _generate_product_id(self, cursor) -> str:
+        """Generate next product ID based on max existing numeric ID"""
+        cursor.execute("SELECT MAX(CAST(id AS UNSIGNED)) FROM products")
+        result = cursor.fetchone()
+        max_id = result[0] if result[0] else 0
+        return str(max_id + 1)
+
     def create(self, product: Product) -> Optional[int]:
         """Create new product"""
         try:
+            self.last_error = ""
             conn = self._get_connection()
             cursor = conn.cursor()
             
+            # Generate product ID (DB id is varchar, not auto_increment)
+            product_id = self._generate_product_id(cursor)
+            
             query = """
-                INSERT INTO products (tenSP, mota, gia, categoryID, image)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO products (id, tenSP, mota, gia, categoryID, image, namSX, thongso, bestSeller, stock_quantity)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(query, (
-                product.name, product.description, product.price,
-                product.category_id, product.image_url
+                product_id, product.name, product.description, product.price,
+                product.category_id, product.image_url,
+                getattr(product, 'namSX', None), getattr(product, 'thongso', None),
+                getattr(product, 'bestSeller', 0), product.stock_quantity
             ))
             
             conn.commit()
-            product_id = cursor.lastrowid
             
             cursor.close()
             conn.close()
             
             return product_id
         except Exception as e:
+            self.last_error = str(e)
             print(f"Error creating product: {e}")
             return None
+
+    def get_last_error(self) -> str:
+        """Get last database error message for debugging/admin feedback"""
+        return self.last_error
     
     def get_by_id(self, product_id: int) -> Optional[Product]:
         """Get product by ID"""
@@ -161,12 +179,15 @@ class MySQLProductRepository(IProductRepository):
             
             query = """
                 UPDATE products
-                SET tenSP = %s, mota = %s, gia = %s, categoryID = %s, image = %s
+                SET tenSP = %s, mota = %s, gia = %s, categoryID = %s, image = %s,
+                    namSX = %s, thongso = %s, bestSeller = %s
                 WHERE id = %s
             """
             cursor.execute(query, (
                 product.name, product.description, product.price, product.category_id,
-                product.image_url, product.id
+                product.image_url, getattr(product, 'namSX', None),
+                getattr(product, 'thongso', None), getattr(product, 'bestSeller', 0),
+                product.id
             ))
             
             conn.commit()
@@ -183,6 +204,7 @@ class MySQLProductRepository(IProductRepository):
     def delete(self, product_id: int) -> bool:
         """Delete product"""
         try:
+            self.last_error = ""
             conn = self._get_connection()
             cursor = conn.cursor()
             
@@ -197,6 +219,7 @@ class MySQLProductRepository(IProductRepository):
             
             return success
         except Exception as e:
+            self.last_error = str(e)
             print(f"Error deleting product: {e}")
             return False
     

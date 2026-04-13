@@ -33,9 +33,6 @@ class User:
         if not self.password or len(self.password) < 6:
             return False, "Password phải có ít nhất 6 ký tự"
         
-        if not self.full_name:
-            return False, "Họ tên không được để trống"
-        
         return True, ""
     
     def to_dict(self) -> dict:

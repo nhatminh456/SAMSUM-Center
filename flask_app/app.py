@@ -2,7 +2,8 @@
 SAMSUM Center - Samsung E-commerce Application
 Clean Architecture Implementation
 """
-from flask import Flask, render_template, request, session
+from urllib.parse import urlparse, parse_qs, unquote
+from flask import Flask, render_template, request, session, url_for
 from config import SECRET_KEY
 from src.container import container
 
@@ -158,7 +159,7 @@ def admin_edit_product(product_id):
     return product_controller.admin_edit_product(product_id)
 
 
-@app.route('/admin/product/delete/<int:product_id>')
+@app.route('/admin/product/delete/<int:product_id>', methods=['POST'])
 def admin_delete_product(product_id):
     """Admin: Delete product"""
     return product_controller.admin_delete_product(product_id)
@@ -194,7 +195,30 @@ def admin_update_order_status(order_id):
 def inject_categories():
     """Inject categories into all templates"""
     categories = get_all_categories.execute()
-    return dict(categories=categories)
+
+    def resolve_image_src(image_value):
+        """Resolve image source for both external URL and static image filename."""
+        image_text = str(image_value or '').strip()
+        if not image_text:
+            return 'https://via.placeholder.com/300x200?text=No+Image'
+
+        lower_image = image_text.lower()
+        if lower_image.startswith('http://') or lower_image.startswith('https://'):
+            if 'google.com/imgres' in lower_image and 'imgurl=' in lower_image:
+                try:
+                    parsed = urlparse(image_text)
+                    params = parse_qs(parsed.query)
+                    direct = params.get('imgurl', [''])[0]
+                    direct = unquote(direct).strip()
+                    if direct:
+                        return direct
+                except Exception:
+                    pass
+            return image_text
+
+        return url_for('static', filename='images/' + image_text.lstrip('/'))
+
+    return dict(categories=categories, resolve_image_src=resolve_image_src)
 
 
 

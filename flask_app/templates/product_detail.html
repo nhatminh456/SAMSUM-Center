@@ -100,7 +100,7 @@
     <div class="row">
         <!-- Product Image -->
         <div class="col-md-6">
-            <img src="{{ url_for('static', filename='images/' ~ product.image_url) }}" 
+              <img src="{{ resolve_image_src(product.image_url) }}" 
                  class="img-fluid product-detail-img" alt="{{ product.name }}"
                  onerror="this.src='https://via.placeholder.com/500x400?text={{ product.name }}'">
         </div>
@@ -142,6 +142,16 @@
             </div>
             {% endif %}
             
+            {% if session.get('user_role') == 'admin' %}
+            <div class="alert alert-warning mb-3">
+                Tài khoản admin không có quyền mua sản phẩm.
+            </div>
+            <div class="d-grid gap-3">
+                <a href="{{ url_for('products') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 15px; font-weight: 600;">
+                    <i class="fas fa-arrow-left me-2"></i> Quay lại danh sách
+                </a>
+            </div>
+            {% else %}
             <!-- Add to Cart Form -->
             <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}" class="mb-3">
                 <div class="row g-2 align-items-end">
@@ -166,6 +176,7 @@
                     <i class="fas fa-arrow-left me-2"></i> Quay lại danh sách
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
     
@@ -179,12 +190,12 @@
             {% for rp in related_products %}
             <div class="col-md-3 mb-4">
                 <div class="card product-card h-100">
-                    <img src="{{ url_for('static', filename='images/' ~ rp.image) }}" 
-                         class="card-img-top" alt="{{ rp.tenSP }}"
-                         onerror="this.src='https://via.placeholder.com/300x200?text={{ rp.tenSP }}'">
+                    <img src="{{ resolve_image_src(rp.image_url) }}" 
+                        class="card-img-top" alt="{{ rp.name }}"
+                        onerror="this.src='https://via.placeholder.com/300x200?text={{ rp.name }}'">
                     <div class="card-body">
-                        <h5 class="card-title">{{ rp.tenSP }}</h5>
-                        <p class="card-text text-danger fw-bold">{{ "{:,}".format(rp.gia) }} VNĐ</p>
+                        <h5 class="card-title">{{ rp.name }}</h5>
+                        <p class="card-text text-danger fw-bold">{{ "{:,}".format(rp.price) }} VNĐ</p>
                         <a href="{{ url_for('product_detail', product_id=rp.id) }}" class="btn btn-outline-primary btn-sm w-100">
                             Xem chi tiết
                         </a>

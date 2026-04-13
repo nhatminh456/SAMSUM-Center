@@ -23,6 +23,15 @@ class OrderController:
         self.get_by_id_use_case = get_by_id_use_case
         self.get_all_use_case = get_all_use_case
         self.update_status_use_case = update_status_use_case
+
+    def _is_admin_user(self) -> bool:
+        """Check if current session belongs to an admin account."""
+        return session.get('user_role') == 'admin'
+
+    def _block_admin_purchase(self):
+        """Admin accounts can manage shop data but cannot place customer orders."""
+        flash('Tài khoản admin không thể mua sản phẩm, chỉ được quản lý đơn hàng', 'warning')
+        return redirect(url_for('admin_orders'))
     
     def _get_cart_with_details(self):
         """Get cart with product details"""
@@ -51,11 +60,17 @@ class OrderController:
     
     def show_cart(self):
         """Show shopping cart"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         cart_items, total = self._get_cart_with_details()
         return render_template('cart.html', cart=cart_items, total=total)
     
     def add_to_cart(self, product_id):
         """Add product to cart"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         from src.container import container
         
         # Get product details
@@ -78,6 +93,9 @@ class OrderController:
     
     def update_cart(self, product_id):
         """Update cart quantity"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         if request.method == 'POST':
             quantity = int(request.form.get('quantity', 1))
             cart = session.get('cart', {})
@@ -97,6 +115,9 @@ class OrderController:
     
     def remove_from_cart(self, product_id):
         """Remove product from cart"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         cart = session.get('cart', {})
         product_id_str = str(product_id)
         
@@ -109,12 +130,18 @@ class OrderController:
     
     def clear_cart(self):
         """Clear all cart"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         session['cart'] = {}
         flash('Đã xóa tất cả sản phẩm trong giỏ hàng', 'success')
         return redirect(url_for('cart'))
     
     def show_checkout(self):
         """Show checkout page"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         if 'user_id' not in session:
             flash('Vui lòng đăng nhập để thanh toán', 'warning')
             return redirect(url_for('login'))
@@ -129,6 +156,9 @@ class OrderController:
     
     def checkout(self):
         """Process checkout"""
+        if self._is_admin_user():
+            return self._block_admin_purchase()
+
         if 'user_id' not in session:
             flash('Vui lòng đăng nhập để thanh toán', 'warning')
             return redirect(url_for('login'))
@@ -142,9 +172,9 @@ class OrderController:
             # Create order entity
             order = Order(
                 user_id=session['user_id'],
-                customer_name=request.form.get('customer_name', ''),
-                customer_phone=request.form.get('customer_phone', ''),
-                customer_address=request.form.get('customer_address', ''),
+                customer_name=request.form.get('name', ''),
+                customer_phone=request.form.get('phone', ''),
+                customer_address=request.form.get('address', ''),
                 payment_method=request.form.get('payment_method', 'cod')
             )
             
@@ -176,11 +206,16 @@ class OrderController:
     
     def user_orders(self):
         """Show user's orders"""
+        if self._is_admin_user():
+            flash('Tài khoản admin chỉ dùng trang quản lý đơn hàng', 'info')
+            return redirect(url_for('admin_orders'))
+
         if 'user_id' not in session:
             flash('Vui lòng đăng nhập', 'warning')
             return redirect(url_for('login'))
         
-        orders = self.get_user_orders_use_case.execute(session['user_id'])
+        user_id = session['user_id']
+        orders = self.get_user_orders_use_case.execute(user_id)
         return render_template('order_history.html', orders=orders)
     
     def order_detail(self, order_id):

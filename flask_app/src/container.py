@@ -111,7 +111,8 @@ class DIContainer:
             self.search_products_use_case,
             self.create_product_use_case,
             self.update_product_use_case,
-            self.delete_product_use_case
+            self.delete_product_use_case,
+            self.get_all_categories_use_case
         )
         
         self.order_controller = OrderController(

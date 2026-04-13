@@ -64,7 +64,8 @@
                     </button>
                 </form>
                 
-                <!-- Shopping Cart -->
+                <!-- Shopping Cart (hidden for admin) -->
+                {% if session.get('user_role') != 'admin' %}
                 <a href="{{ url_for('cart') }}" class="btn btn-outline-primary me-3 position-relative">
                     <i class="fas fa-shopping-cart"></i>
                     {% if session.get('cart') %}
@@ -73,6 +74,7 @@
                     </span>
                     {% endif %}
                 </a>
+                {% endif %}
                 
                 <!-- User Menu -->
                 <ul class="navbar-nav">
@@ -82,9 +84,15 @@
                             <i class="fas fa-user"></i> {{ session.get('username') or session.get('user_email') }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            {% if session.get('user_role') == 'admin' %}
+                            <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}">
+                                <i class="fas fa-shopping-cart"></i> Quản lý đơn hàng
+                            </a></li>
+                            {% else %}
                             <li><a class="dropdown-item" href="{{ url_for('orders') }}">
                                 <i class="fas fa-history"></i> Đơn hàng của tôi
                             </a></li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Đăng xuất

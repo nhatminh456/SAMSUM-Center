@@ -25,13 +25,17 @@ class UserController:
     def register(self):
         """Handle user registration"""
         if request.method == 'POST':
+            password = request.form.get('password', '')
+            confirm_password = request.form.get('confirm_password', '')
+            
+            if password != confirm_password:
+                flash('Mật khẩu xác nhận không khớp', 'danger')
+                return render_template('register.html')
+            
             user = User(
                 username=request.form.get('username', ''),
                 email=request.form.get('email', ''),
-                password=request.form.get('password', ''),
-                full_name=request.form.get('full_name', ''),
-                phone=request.form.get('phone', ''),
-                address=request.form.get('address', ''),
+                password=password,
                 role='user'
             )
             

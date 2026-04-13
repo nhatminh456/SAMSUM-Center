@@ -22,7 +22,7 @@
                 {% for order in orders %}
                 <tr>
                     <td><strong>{{ order.id }}</strong></td>
-                    <td>{{ order.order_date.strftime('%d/%m/%Y %H:%M') if order.order_date else 'N/A' }}</td>
+                    <td>{{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'N/A' }}</td>
                     <td class="text-danger fw-bold">{{ "{:,.0f}".format(order.total_amount) }} ₫</td>
                     <td>
                         {% if order.status == 'pending' %}

@@ -29,7 +29,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ url_for('static', filename='images/' ~ item.image_url) }}" 
+                                                <img src="{{ resolve_image_src(item.image_url) }}" 
                                                  alt="{{ item.name }}" 
                                                  class="rounded"
                                                  style="width: 80px; height: 80px; object-fit: cover;"

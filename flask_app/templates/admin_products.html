@@ -314,25 +314,25 @@
                         <tr>
                             <td><span class="product-id">{{ product.id }}</span></td>
                             <td>
-                                <img src="{{ url_for('static', filename='images/' ~ product.image) }}" 
-                                     class="product-image-thumb" 
-                                     alt="{{ product.tenSP }}"
-                                     onerror="this.src='https://via.placeholder.com/60x60?text=No+Image'">
+                                  <img src="{{ resolve_image_src(product.image_url) }}" 
+                                      class="product-image-thumb" 
+                                      alt="{{ product.name }}"
+                                      onerror="this.src='https://via.placeholder.com/60x60?text=No+Image'">
                             </td>
-                            <td><span class="product-name">{{ product.tenSP }}</span></td>
-                            <td><span class="product-price">{{ "{:,}".format(product.gia) }} ₫</span></td>
+                            <td><span class="product-name">{{ product.name }}</span></td>
+                            <td><span class="product-price">{{ '{:,}'.format(product.price|default(0)|int) }} ₫</span></td>
                             <td>
-                                {% if product.categoryID == 1 %}
+                                {% if product.category_id == 1 %}
                                 <span class="category-badge category-s">S-Series</span>
-                                {% elif product.categoryID == 2 %}
+                                {% elif product.category_id == 2 %}
                                 <span class="category-badge category-a">A-Series</span>
-                                {% elif product.categoryID == 3 %}
+                                {% elif product.category_id == 3 %}
                                 <span class="category-badge category-m">M-Series</span>
-                                {% elif product.categoryID == 4 %}
+                                {% elif product.category_id == 4 %}
                                 <span class="category-badge category-z">Z-Series</span>
                                 {% endif %}
                             </td>
-                            <td><strong>{{ product.namSX }}</strong></td>
+                            <td><strong>{{ product.created_at.year if product.created_at else '' }}</strong></td>
                             <td>
                                 {% if product.bestSeller %}
                                 <span class="bestseller-yes"><i class="fas fa-star me-1"></i> Yes</span>

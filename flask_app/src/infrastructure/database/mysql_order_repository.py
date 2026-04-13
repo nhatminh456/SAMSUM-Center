@@ -24,8 +24,8 @@ class MySQLOrderRepository(IOrderRepository):
             
             # Insert order
             order_query = """
-                INSERT INTO orders (id, user_id, customer_name, customer_phone, 
-                                   customer_address, payment_method, total_amount, status)
+                INSERT INTO orders (id, user_id, shipping_name, shipping_phone, 
+                                   shipping_address, payment_method, total_amount, status)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(order_query, (
@@ -86,13 +86,13 @@ class MySQLOrderRepository(IOrderRepository):
             order = Order(
                 id=order_row['id'],
                 user_id=order_row['user_id'],
-                customer_name=order_row['customer_name'],
-                customer_phone=order_row['customer_phone'],
-                customer_address=order_row['customer_address'],
-                payment_method=order_row['payment_method'],
-                total_amount=order_row['total_amount'],
+                customer_name=order_row.get('shipping_name', ''),
+                customer_phone=order_row.get('shipping_phone', ''),
+                customer_address=order_row.get('shipping_address', ''),
+                payment_method=order_row.get('payment_method', ''),
+                total_amount=float(order_row['total_amount']),
                 status=OrderStatus.from_string(order_row['status']),
-                created_at=order_row['created_at']
+                created_at=order_row.get('order_date')
             )
             
             # Add items
@@ -105,34 +105,30 @@ class MySQLOrderRepository(IOrderRepository):
             print(f"Error getting order: {e}")
             return None
     
-    def get_by_user(self, user_id: int) -> List[Order]:
+    def get_by_user(self, user_id: str) -> List[Order]:
         """Get all orders by user"""
         try:
             conn = self._get_connection()
             cursor = conn.cursor(dictionary=True)
-            
-            query = "SELECT * FROM orders WHERE user_id = %s ORDER BY created_at DESC"
+            query = "SELECT * FROM orders WHERE user_id = %s ORDER BY order_date DESC"
             cursor.execute(query, (user_id,))
             rows = cursor.fetchall()
-            
             cursor.close()
             conn.close()
-            
             orders = []
             for row in rows:
                 order = Order(
                     id=row['id'],
                     user_id=row['user_id'],
-                    customer_name=row['customer_name'],
-                    customer_phone=row['customer_phone'],
-                    customer_address=row['customer_address'],
-                    payment_method=row['payment_method'],
-                    total_amount=row['total_amount'],
+                    customer_name=row.get('shipping_name', ''),
+                    customer_phone=row.get('shipping_phone', ''),
+                    customer_address=row.get('shipping_address', ''),
+                    payment_method=row.get('payment_method', ''),
+                    total_amount=float(row['total_amount']),
                     status=OrderStatus.from_string(row['status']),
-                    created_at=row['created_at']
+                    created_at=row.get('order_date')
                 )
                 orders.append(order)
-            
             return orders
         except Exception as e:
             print(f"Error getting user orders: {e}")
@@ -144,7 +140,7 @@ class MySQLOrderRepository(IOrderRepository):
             conn = self._get_connection()
             cursor = conn.cursor(dictionary=True)
             
-            query = "SELECT * FROM orders ORDER BY created_at DESC"
+            query = "SELECT * FROM orders ORDER BY order_date DESC"
             cursor.execute(query)
             rows = cursor.fetchall()
             
@@ -156,13 +152,13 @@ class MySQLOrderRepository(IOrderRepository):
                 order = Order(
                     id=row['id'],
                     user_id=row['user_id'],
-                    customer_name=row['customer_name'],
-                    customer_phone=row['customer_phone'],
-                    customer_address=row['customer_address'],
-                    payment_method=row['payment_method'],
-                    total_amount=row['total_amount'],
+                    customer_name=row.get('shipping_name', ''),
+                    customer_phone=row.get('shipping_phone', ''),
+                    customer_address=row.get('shipping_address', ''),
+                    payment_method=row.get('payment_method', ''),
+                    total_amount=float(row['total_amount']),
                     status=OrderStatus.from_string(row['status']),
-                    created_at=row['created_at']
+                    created_at=row.get('order_date')
                 )
                 orders.append(order)
             

@@ -79,7 +79,7 @@ class Order:
     """Order domain entity"""
     
     id: Optional[str] = None
-    user_id: int = 0
+    user_id: str = ""
     customer_name: str = ""
     customer_phone: str = ""
     customer_address: str = ""
